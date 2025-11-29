@@ -1,0 +1,191 @@
+<div class="checkout-container">
+  <div class="checkout-header">
+    <button
+      mat-icon-button
+      routerLink="/cart"
+      class="back-button"
+      matTooltip="Voltar ao Carrinho"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>
+      <mat-icon>shopping_bag</mat-icon>
+      Finalizar Compra
+    </h1>
+  </div>
+
+  <div class="checkout-content">
+    <!-- Informações de Entrega -->
+    <div class="checkout-section">
+      <mat-card class="info-card">
+        <h2>
+          <mat-icon>local_shipping</mat-icon>
+          Informações de Entrega
+        </h2>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>CEP</mat-label>
+          <input
+            matInput
+            [(ngModel)]="cep"
+            name="cep"
+            placeholder="00000-000"
+            maxlength="8"
+            (input)="formatCep($event)"
+            [disabled]="showSummary"
+          />
+          <mat-icon matPrefix>location_on</mat-icon>
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="calculateFrete()"
+          [disabled]="cep.length < 8 || showSummary"
+          class="calculate-button"
+        >
+          <mat-icon>calculate</mat-icon>
+          Calcular Frete
+        </button>
+
+        <div class="frete-info" *ngIf="showSummary">
+          <mat-icon [class.free]="frete === 0">{{
+            frete === 0 ? "check_circle" : "local_shipping"
+          }}</mat-icon>
+          <div>
+            <p class="frete-label">Valor do Frete:</p>
+            <p class="frete-value" [class.free]="frete === 0">
+              {{ frete === 0 ? "GRÁTIS" : (frete | currency : "BRL") }}
+            </p>
+            <p class="frete-note" *ngIf="frete === 0">
+              Frete grátis para compras acima de R$ 100,00!
+            </p>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Resumo do Pedido -->
+      <mat-card class="summary-card" *ngIf="showSummary">
+        <h2>
+          <mat-icon>receipt</mat-icon>
+          Resumo do Pedido
+        </h2>
+
+        <div class="summary-items">
+          <div class="summary-item" *ngFor="let item of items()">
+            <div class="item-info">
+              <img
+                [src]="
+                  item.product.imageUrl ||
+                  'https://via.placeholder.com/60?text=Sem+Imagem'
+                "
+                [alt]="item.product.name"
+              />
+              <div>
+                <p class="item-name">{{ item.product.name }}</p>
+                <p class="item-quantity">Quantidade: {{ item.quantity }}</p>
+              </div>
+            </div>
+            <p class="item-price">
+              {{ item.product.price * item.quantity | currency : "BRL" }}
+            </p>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="summary-totals">
+          <div class="summary-line">
+            <span>Subtotal ({{ itemCount() }} itens):</span>
+            <span>{{ subtotal() | currency : "BRL" }}</span>
+          </div>
+          <div class="summary-line">
+            <span>Frete:</span>
+            <span [class.free-text]="frete === 0">{{
+              frete === 0 ? "GRÁTIS" : (frete | currency : "BRL")
+            }}</span>
+          </div>
+          <div class="summary-line total">
+            <span>Total:</span>
+            <span>{{ total | currency : "BRL" }}</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="finalizePurchase()"
+            [disabled]="loading"
+            class="finalize-button"
+          >
+            <mat-spinner
+              *ngIf="loading"
+              diameter="20"
+              class="spinner"
+            ></mat-spinner>
+            <mat-icon *ngIf="!loading">check_circle</mat-icon>
+            <span *ngIf="!loading">Confirmar Pedido</span>
+          </button>
+
+          <button
+            mat-stroked-button
+            (click)="cancelOrder()"
+            [disabled]="loading"
+            class="cancel-button"
+          >
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+
+          <button
+            mat-stroked-button
+            (click)="continueShopping()"
+            [disabled]="loading"
+            class="continue-button"
+          >
+            <mat-icon>shopping_cart</mat-icon>
+            Continuar Comprando
+          </button>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Informações do Carrinho -->
+    <div class="cart-preview card">
+      <h2>
+        <mat-icon>shopping_cart</mat-icon>
+        Itens no Carrinho
+      </h2>
+      <p class="item-count">{{ itemCount() }} item(s)</p>
+
+      <div class="preview-items">
+        <div class="preview-item" *ngFor="let item of items()">
+          <img
+            [src]="
+              item.product.imageUrl ||
+              'https://via.placeholder.com/50?text=Sem+Imagem'
+            "
+            [alt]="item.product.name"
+          />
+          <div class="preview-info">
+            <p class="preview-name">{{ item.product.name }}</p>
+            <p class="preview-quantity">
+              {{ item.quantity }}x {{ item.product.price | currency : "BRL" }}
+            </p>
+          </div>
+          <p class="preview-total">
+            {{ item.product.price * item.quantity | currency : "BRL" }}
+          </p>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="preview-subtotal">
+        <span>Subtotal:</span>
+        <span class="value">{{ subtotal() | currency : "BRL" }}</span>
+      </div>
+    </div>
+  </div>
+</div>
